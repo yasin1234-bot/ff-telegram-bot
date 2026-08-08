@@ -15,9 +15,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # ==================== CONFIGURATION ====================
-
 BOT_TOKEN = os.getenv("BOT_TOKEN", "8953592093:AAFNEScJPz_GR7jEaTsQY_u95A1AJK5ro_E")
-
 FLASK_API_BASE_URL = os.getenv("FLASK_API_URL", "https://ff-follower-bot.onrender.com")
 FLASK_API_URL = f"{FLASK_API_BASE_URL}/api/v1/generate-pass"
 
