@@ -4,7 +4,9 @@ import random
 import string
 import requests
 import logging
+import threading
 from datetime import datetime, timedelta
+from flask import Flask
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, ContextTypes
 
@@ -34,6 +36,18 @@ CHANNEL_LINKS = [
     "https://t.me/tom_codex1"
 ]
 # =======================================================
+
+# ==================== DUMMY WEB SERVER FOR RENDER FREE TIER ====================
+fake_app = Flask(__name__)
+
+@fake_app.route('/')
+def health():
+    return "Bot is alive and running fine!"
+
+def run_fake_server():
+    port = int(os.environ.get("PORT", 8080))
+    fake_app.run(host='0.0.0.0', port=port)
+# ==============================================================================
 
 def get_channels_config():
     """Dynamically fetch channels, links, and validity duration from Flask configuration"""
@@ -170,10 +184,14 @@ async def check_membership(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text(text=warning_text, reply_markup=reply_markup, parse_mode='Markdown')
 
 if __name__ == '__main__':
+    # ১. ব্যাকগ্রাউন্ডে ডামি ওয়েব সার্ভার চালুকরণ (Render Port Check পাস করার জন্য)
+    threading.Thread(target=run_fake_server, daemon=True).start()
+    
+    # ২. টেলিগ্রাম বট চালুকরণ
     app = ApplicationBuilder().token(BOT_TOKEN).build()
     
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CallbackQueryHandler(check_membership, pattern="^verify_membership$"))
     
-    print("🤖 Telegram Verification Bot is running...")
+    print("🤖 Telegram Verification Bot with Health Check is running...")
     app.run_polling()
